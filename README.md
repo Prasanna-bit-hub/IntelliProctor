@@ -46,6 +46,14 @@ Admin Dashboard & Reports
 * User authentication
 * Face recognition verification
 * Advanced AI behavior analysis
+  
+## Screenshots
+
+### Dashboard
+
+### Alerts
+
+### Report
 
 ## Developed By
 
