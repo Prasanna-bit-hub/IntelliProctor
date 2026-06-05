@@ -51,9 +51,15 @@ Admin Dashboard & Reports
 
 ### Dashboard
 
+![Dashboard](screenshots/dashboard.png)
+
 ### Alerts
 
+![Alerts](screenshots/alerts.png)
+
 ### Report
+
+![Report](screenshots/report.png)
 
 ## Developed By
 
