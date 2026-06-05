@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>INTELLIPROCTOR ADMIN</title>
+
+    <link rel="stylesheet"
+          href="/static/css/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    <!-- SIDEBAR -->
+
+    <div class="sidebar">
+
+        <h2>INTELLIPROCTOR</h2>
+
+        <ul>
+
+            <li>
+                <a href="/">Dashboard</a>
+            </li>
+
+            <li>
+                <a href="/admin">Admin Panel</a>
+            </li>
+
+            <li>
+                <a href="/report">Reports</a>
+            </li>
+
+            <li>
+                <a href="/alerts_page">Alerts</a>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <!-- MAIN CONTENT -->
+
+    <div class="main-content">
+
+        <div class="top-header">
+
+            <h1>LIVE EXAM MONITORING</h1>
+
+            <div class="status-live">
+                ● LIVE
+            </div>
+
+        </div>
+
+        <!-- CARDS -->
+
+        <div class="admin-cards">
+
+            <div class="admin-card">
+                <h3>Total Alerts</h3>
+                <p id="totalAlerts">0</p>
+            </div>
+
+            <div class="admin-card">
+                <h3>High Alerts</h3>
+                <p id="highAlerts">0</p>
+            </div>
+
+            <div class="admin-card">
+                <h3>Integrity Score</h3>
+                <p id="integrityScore">100</p>
+            </div>
+
+            <div class="admin-card">
+                <h3>Candidates</h3>
+                <p>1</p>
+            </div>
+
+        </div>
+
+        <!-- CHART -->
+
+        <div class="chart-container">
+
+            <canvas id="alertChart"></canvas>
+
+        </div>
+
+        <!-- TABLE -->
+
+        <div class="live-alerts-box">
+
+            <h2>Recent Alerts</h2>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Timestamp</th>
+                        <th>Alert Type</th>
+                        <th>Severity</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="adminAlertTable">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const socket = io();
+
+    let chart;
+    let chartCounts = {};
+
+    async function loadAlerts(){
+
+        const response =
+            await fetch('/alerts');
+
+        const alerts =
+            await response.json();
+
+        const tbody =
+            document.getElementById(
+                'adminAlertTable'
+            );
+
+        tbody.innerHTML = '';
+
+        let high = 0;
+        let score = 100;
+
+        chartCounts = {};
+
+        alerts.forEach(alert => {
+
+            // TABLE
+
+            const row =
+                document.createElement('tr');
+
+            row.innerHTML = `
+                <td>${alert.timestamp}</td>
+                <td>${alert.alert_type}</td>
+                <td>
+                    <span class="severity-badge ${alert.severity}">
+                        ${alert.severity}
+                    </span>
+                </td>
+            `;
+
+            tbody.prepend(row);
+
+            // HIGH ALERTS
+
+            if(alert.severity === 'HIGH'){
+                high++;
+                score -= 10;
+            }
+
+            if(alert.severity === 'MEDIUM'){
+                score -= 5;
+            }
+
+            if(alert.severity === 'LOW'){
+                score -= 2;
+            }
+
+            // CHART COUNTS
+
+            if(chartCounts[alert.alert_type]){
+                chartCounts[alert.alert_type]++;
+            }else{
+                chartCounts[alert.alert_type] = 1;
+            }
+
+        });
+
+        if(score < 0){
+            score = 0;
+        }
+
+        document.getElementById(
+            'totalAlerts'
+        ).innerText = alerts.length;
+
+        document.getElementById(
+            'highAlerts'
+        ).innerText = high;
+
+        document.getElementById(
+            'integrityScore'
+        ).innerText = score;
+
+        createChart();
+    }
+
+    function createChart(){
+
+        const ctx =
+            document.getElementById(
+                'alertChart'
+            );
+
+        if(chart){
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+
+            type:'bar',
+
+            data:{
+
+                labels:Object.keys(chartCounts),
+
+                datasets:[{
+                    label:'Alerts',
+                    data:Object.values(chartCounts)
+                }]
+            }
+        });
+    }
+
+    // LIVE SOCKET EVENTS
+
+    socket.on('new_alert', function(data){
+
+        const tbody =
+            document.getElementById(
+                'adminAlertTable'
+            );
+
+        const row =
+            document.createElement('tr');
+
+        row.innerHTML = `
+            <td>${data.timestamp}</td>
+            <td>${data.alert_type}</td>
+            <td>
+                <span class="severity-badge ${data.severity}">
+                    ${data.severity}
+                </span>
+            </td>
+        `;
+
+        tbody.prepend(row);
+
+        // TOTAL ALERTS
+
+        const total =
+            document.getElementById(
+                'totalAlerts'
+            );
+
+        total.innerText =
+            parseInt(total.innerText) + 1;
+
+        // HIGH ALERTS
+
+        if(data.severity === 'HIGH'){
+
+            const high =
+                document.getElementById(
+                    'highAlerts'
+                );
+
+            high.innerText =
+                parseInt(high.innerText) + 1;
+        }
+
+        // SCORE
+
+        const score =
+            document.getElementById(
+                'integrityScore'
+            );
+
+        let current =
+            parseInt(score.innerText);
+
+        if(data.severity === 'HIGH'){
+            current -= 10;
+        }
+
+        if(data.severity === 'MEDIUM'){
+            current -= 5;
+        }
+
+        if(data.severity === 'LOW'){
+            current -= 2;
+        }
+
+        if(current < 0){
+            current = 0;
+        }
+
+        score.innerText = current;
+
+        // UPDATE CHART
+
+        if(chartCounts[data.alert_type]){
+            chartCounts[data.alert_type]++;
+        }else{
+            chartCounts[data.alert_type] = 1;
+        }
+
+        createChart();
+    });
+
+    loadAlerts();
+
+</script>
+
+</body>
+</html>

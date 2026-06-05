@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>All Alerts</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <div class="page-header">
+
+        <h1>
+            Alert History
+        </h1>
+
+        <a
+            href="/"
+            class="back-btn"
+        >
+            ← Back
+        </a>
+
+    </div>
+
+    <div class="table-container">
+
+        <table class="alerts-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>Alert Type</th>
+                    <th>Severity</th>
+                    <th>Snapshot</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="alertsTable">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+async function loadAlerts(){
+
+    const response =
+        await fetch('/alerts');
+
+    const alerts =
+        await response.json();
+
+    const table =
+        document.getElementById(
+            'alertsTable'
+        );
+
+    table.innerHTML = '';
+
+    alerts.forEach(alert => {
+
+        const row =
+            document.createElement('tr');
+
+        row.innerHTML = `
+
+            <td>${alert.id}</td>
+
+            <td>${alert.timestamp}</td>
+
+            <td>${alert.alert_type}</td>
+
+            <td>
+                <span class="severity ${alert.severity}">
+                    ${alert.severity}
+                </span>
+            </td>
+
+            <td>
+
+                <img
+                    src="/${alert.snapshot_path}"
+                    class="snapshot-image"
+                >
+
+            </td>
+
+        `;
+
+        table.appendChild(row);
+
+    });
+}
+
+loadAlerts();
+
+</script>
+
+</body>
+
+</html>

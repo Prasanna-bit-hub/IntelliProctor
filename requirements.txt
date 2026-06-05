@@ -1,0 +1,10 @@
+Flask
+Flask-SocketIO
+opencv-python
+mediapipe
+ultralytics
+numpy
+sounddevice
+scipy
+pandas
+eventlet

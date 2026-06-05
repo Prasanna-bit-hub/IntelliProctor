@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>INTELLIPROCTOR</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css"
+    >
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+</head>
+
+<body>
+
+<div class="main-dashboard">
+
+    <!-- SIDEBAR -->
+
+    <div class="sidebar">
+
+        <div>
+
+            <h2 class="logo">
+                INTELLIPROCTOR
+            </h2>
+
+            <ul class="nav-links">
+
+                <li>
+                    <a href="/">
+                        Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/admin">
+                        Admin Panel
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/alerts_page">
+                        Alerts
+                    </a>
+                </li>
+
+                <li>
+                    <a href="/report">
+                        Reports
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+
+        <div class="live-badge">
+            ● AI ACTIVE
+        </div>
+
+    </div>
+
+    <!-- MAIN CONTENT -->
+
+    <div class="content">
+
+        <!-- HEADER -->
+
+        <div class="header">
+
+            <div>
+
+                <h1>
+                    Smart AI Exam Monitoring
+                </h1>
+
+                <p>
+                    Real-Time Multi-Modal Proctoring
+                </p>
+
+            </div>
+
+            <div class="buttons">
+
+                <button id="startBtn">
+                    START MONITORING
+                </button>
+
+                <button id="stopBtn">
+                    STOP
+                </button>
+
+                <button id="resetBtn">
+                    RESET ALERTS
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- VIDEO -->
+
+        <div class="video-card">
+
+            <img
+                src="/video_feed"
+                id="videoFeed"
+            >
+
+        </div>
+
+        <!-- STATS -->
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <h3>Total Alerts</h3>
+
+                <p id="totalAlerts">
+                    0
+                </p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h3>High Severity</h3>
+
+                <p id="highAlerts">
+                    0
+                </p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h3>Integrity Score</h3>
+
+                <p id="integrityScore">
+                    100
+                </p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h3>Session Status</h3>
+
+                <p id="sessionStatus">
+                    CLEAN
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- LIVE ALERTS -->
+
+        <div class="alerts-container">
+
+            <div class="alerts-header">
+
+                <h2>
+                    Live Alerts
+                </h2>
+
+            </div>
+
+            <div
+                class="alerts-list"
+                id="alertsList"
+            >
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+document.addEventListener(
+    'fullscreenchange',
+    () => {
+
+        if(
+            !document.fullscreenElement
+        ){
+
+            fetch(
+                '/fullscreen_alert',
+                {
+                    method:'POST'
+                }
+            );
+        }
+    }
+);
+
+
+// FORCE FULLSCREEN
+
+async function enterFullscreen(){
+
+    const elem =
+        document.documentElement;
+
+    if(
+        elem.requestFullscreen
+    ){
+
+        await elem.requestFullscreen();
+    }
+}
+
+
+// START BUTTON
+
+document.getElementById(
+    'startBtn'
+).addEventListener(
+
+    'click',
+
+    async () => {
+
+        await enterFullscreen();
+    }
+);
+
+</script>
+
+<script src="/static/js/dashboard.js"></script>
+
+<script>
+
+let tabSwitchCount = 0;
+
+// TAB HIDDEN
+
+document.addEventListener(
+    "visibilitychange",
+    async function () {
+
+        if (document.hidden) {
+
+            tabSwitchCount++;
+
+            await fetch('/tab_switch', {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+
+            });
+
+            console.log(
+                "TAB SWITCH DETECTED"
+            );
+        }
+    }
+);
+
+</script>
+
+</body>
+
+</html>
