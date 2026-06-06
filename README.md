@@ -51,17 +51,20 @@ Admin Dashboard & Reports
 
 ### Dashboard
 
-![Dashboard](screenshots/dashboard.png)
-
-### Alerts
-
-![Alerts](screenshots/alerts.png)
+<img src="screenshots/dashboard.png" width="700">
 
 ### Working
 
+<img src="screenshots/working.png" width="700">
+
+### Alerts
+
+<img src="screenshots/alerts.png" width="700">
+
 ### Report
 
-![Report](screenshots/report.png)
+<img src="screenshots/report.png" width="700">
+
 
 ## Developed By
 
